@@ -1,0 +1,89 @@
+{
+	"compiler": {
+		"version": "0.8.6+commit.11564f7e"
+	},
+	"language": "Solidity",
+	"output": {
+		"abi": [
+			{
+				"inputs": [],
+				"name": "beforeAll",
+				"outputs": [],
+				"stateMutability": "nonpayable",
+				"type": "function"
+			},
+			{
+				"inputs": [],
+				"name": "checkWinninProposalWithReturnValue",
+				"outputs": [
+					{
+						"internalType": "bool",
+						"name": "",
+						"type": "bool"
+					}
+				],
+				"stateMutability": "view",
+				"type": "function"
+			},
+			{
+				"inputs": [],
+				"name": "checkWinningProposal",
+				"outputs": [],
+				"stateMutability": "nonpayable",
+				"type": "function"
+			}
+		],
+		"devdoc": {
+			"kind": "dev",
+			"methods": {},
+			"version": 1
+		},
+		"userdoc": {
+			"kind": "user",
+			"methods": {},
+			"version": 1
+		}
+	},
+	"settings": {
+		"compilationTarget": {
+			"tests/4_Ballot_test.sol": "BallotTest"
+		},
+		"evmVersion": "berlin",
+		"libraries": {},
+		"metadata": {
+			"bytecodeHash": "ipfs"
+		},
+		"optimizer": {
+			"enabled": false,
+			"runs": 200
+		},
+		"remappings": []
+	},
+	"sources": {
+		"contracts/3_Ballot.sol": {
+			"keccak256": "0xdd897b48a563d1d32369fdb327187dfcd2660159cfcd3787196bb6be6a312c8d",
+			"license": "GPL-3.0",
+			"urls": [
+				"bzz-raw://551d7a6d3e2abc66a7b37fbd8b0e4c07b43c72c3b55958e66ac421348311fed4",
+				"dweb:/ipfs/Qmd4XV9j79GPfv5cgVsg62vKzaLuf6igx7VSW2BKaUyF3w"
+			]
+		},
+		"remix_tests.sol": {
+			"keccak256": "0xe2783cdc204cba8c72494119339f1d90f9022b15d6c718c668b7f097d8e29787",
+			"license": "GPL-3.0",
+			"urls": [
+				"bzz-raw://bb6a22e64c7f16bcaab63b1c1a1b269d5be8a6d37bdd9dec1718477ab916b18e",
+				"dweb:/ipfs/QmdkW1tT5iadBvaHMCoskhDGZKnfdg8o1D9CcoQYtdJet7"
+			]
+		},
+		"tests/4_Ballot_test.sol": {
+			"keccak256": "0x46f1ba2ef90c42b2d7535c9f7d468120f2f0acaeb64727f846e2477716355689",
+			"license": "GPL-3.0",
+			"urls": [
+				"bzz-raw://55155e7f092806dadbd894e5b3c367343183af8841e7095d2aa1625f45a885ac",
+				"dweb:/ipfs/QmUH3XyQQ5AwykuczYJNJFfcmdFkGS392fTskRfi7QTPav"
+			]
+		}
+	},
+	"version": 1
+}

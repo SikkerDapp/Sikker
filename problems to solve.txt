@@ -1,0 +1,4 @@
+UpdateStats calls V
+TMM interaction: lock is broken
+percent for big volumes
+Sikker profit is double what it should be

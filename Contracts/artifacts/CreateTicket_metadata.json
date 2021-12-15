@@ -1,0 +1,179 @@
+{
+	"compiler": {
+		"version": "0.8.4+commit.c7e474f2"
+	},
+	"language": "Solidity",
+	"output": {
+		"abi": [
+			{
+				"anonymous": false,
+				"inputs": [
+					{
+						"indexed": true,
+						"internalType": "address",
+						"name": "oldOwner",
+						"type": "address"
+					},
+					{
+						"indexed": true,
+						"internalType": "address",
+						"name": "newOwner",
+						"type": "address"
+					}
+				],
+				"name": "OwnerSet",
+				"type": "event"
+			},
+			{
+				"inputs": [
+					{
+						"internalType": "uint64",
+						"name": "_amount",
+						"type": "uint64"
+					},
+					{
+						"internalType": "uint8",
+						"name": "_type",
+						"type": "uint8"
+					},
+					{
+						"internalType": "string",
+						"name": "_hash",
+						"type": "string"
+					}
+				],
+				"name": "_CreateTicket",
+				"outputs": [],
+				"stateMutability": "payable",
+				"type": "function"
+			},
+			{
+				"inputs": [
+					{
+						"internalType": "uint256",
+						"name": "",
+						"type": "uint256"
+					}
+				],
+				"name": "_Tickets",
+				"outputs": [
+					{
+						"internalType": "uint256",
+						"name": "Amount",
+						"type": "uint256"
+					},
+					{
+						"internalType": "uint8",
+						"name": "Type",
+						"type": "uint8"
+					},
+					{
+						"internalType": "address",
+						"name": "Payer",
+						"type": "address"
+					},
+					{
+						"internalType": "address",
+						"name": "Receiver",
+						"type": "address"
+					},
+					{
+						"internalType": "address",
+						"name": "Creator",
+						"type": "address"
+					},
+					{
+						"internalType": "string",
+						"name": "Hash",
+						"type": "string"
+					}
+				],
+				"stateMutability": "view",
+				"type": "function"
+			},
+			{
+				"inputs": [
+					{
+						"internalType": "address",
+						"name": "newOwner",
+						"type": "address"
+					}
+				],
+				"name": "changeOwner",
+				"outputs": [],
+				"stateMutability": "nonpayable",
+				"type": "function"
+			},
+			{
+				"inputs": [],
+				"name": "getOwner",
+				"outputs": [
+					{
+						"internalType": "address",
+						"name": "",
+						"type": "address"
+					}
+				],
+				"stateMutability": "view",
+				"type": "function"
+			}
+		],
+		"devdoc": {
+			"kind": "dev",
+			"methods": {
+				"changeOwner(address)": {
+					"details": "Change owner",
+					"params": {
+						"newOwner": "address of new owner"
+					}
+				},
+				"getOwner()": {
+					"details": "Return owner address ",
+					"returns": {
+						"_0": "address of owner"
+					}
+				}
+			},
+			"version": 1
+		},
+		"userdoc": {
+			"kind": "user",
+			"methods": {},
+			"version": 1
+		}
+	},
+	"settings": {
+		"compilationTarget": {
+			"Contracts/_CreateTickets.sol": "CreateTicket"
+		},
+		"evmVersion": "istanbul",
+		"libraries": {},
+		"metadata": {
+			"bytecodeHash": "ipfs"
+		},
+		"optimizer": {
+			"enabled": false,
+			"runs": 200
+		},
+		"remappings": []
+	},
+	"sources": {
+		"Contracts/2_Owner.sol": {
+			"keccak256": "0x1e624ada939528fff73575187024d951aa6d33d4cbaad97ecf1f3e2a7d717583",
+			"license": "GPL-3.0",
+			"urls": [
+				"bzz-raw://e3f3c6ab93acd1a8bd389f852149d59b6d713efc51458ff95bba42c3329fb0d1",
+				"dweb:/ipfs/QmP7NEPrSbYRM4DzpJ31YUC2KNXUX4USuQk3jMNRUdzVyV"
+			]
+		},
+		"Contracts/_CreateTickets.sol": {
+			"keccak256": "0x63553e5b3a5a3ec2f9c87b1189b75726f2f8ebc956d8ce619026b56150403fa8",
+			"license": "MIT",
+			"urls": [
+				"bzz-raw://efe242dbd5544bd77950243683725959eed098c82eccc93b3a436ea9393ba542",
+				"dweb:/ipfs/QmZPsyorvu5hLqdkUBEnVqzFDJWUYM2NtA81R8TDUDsc8R"
+			]
+		}
+	},
+	"version": 1
+}
