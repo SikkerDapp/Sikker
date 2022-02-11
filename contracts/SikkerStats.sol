@@ -2,7 +2,7 @@
 
 pragma solidity >=0.7.0 <0.9.0;
 
-import "./maths/SikkerMaths.sol";
+import "./SikkerMaths.sol";
 
 contract SikkerStats is SikkerMaths {
     using SafeMath for uint256;

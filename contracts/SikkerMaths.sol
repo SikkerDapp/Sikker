@@ -2,8 +2,8 @@
 
 pragma solidity >=0.7.0 <0.9.0;
 
-import "./SafeMath.sol";
-import "../Sikker.sol";
+import "@openzeppelin/contracts/utils/math/SafeMath.sol";
+import "./Sikker.sol";
 
 contract SikkerMaths is Sikker{
     using SafeMath for uint256;
@@ -25,5 +25,4 @@ contract SikkerMaths is Sikker{
     function OneDown(uint256 _nb) internal pure returns(uint256) {
         return(_nb.sub(1));
     }
-
 }

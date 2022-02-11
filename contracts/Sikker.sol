@@ -57,9 +57,8 @@ They are three types of tickets:
 
 pragma solidity >=0.7.0 <0.9.0;
 
-
+import "@openzeppelin/contracts/utils/math/SafeMath.sol";
 import "./Owner.sol";
-import "./maths/SafeMath.sol";
 
 contract Sikker is Owner {
     using SafeMath for uint256;
