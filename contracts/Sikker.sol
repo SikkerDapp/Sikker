@@ -54,22 +54,18 @@ They are three types of tickets:
 
 **/
 
-
 pragma solidity >=0.7.0 <0.9.0;
 
-
 import "./Owner.sol";
-import "./maths/SafeMath.sol";
+import "@openzeppelin/contracts/utils/math/SafeMath.sol";
 
 contract Sikker is Owner {
     using SafeMath for uint256;
 
     //--------------------------------------  Stats
 
-    
-    bool Checkin = true;
-    bool Nocheck = false;
-    
+    enum checking_t {Checking, NoCheck}
+
     address Dead = 0x000000000000000000000000000000000000dEaD;
 
     //--------------------------------------  tickets
@@ -80,7 +76,7 @@ contract Sikker is Owner {
         type_t Type;                // Type of the ticket: True = CE, False = TMM
         uint256 Amount;             // Amount of wei locked in ticket
         uint256 Timelock;           // Date in seconds when the ticket expires
-        uint256 LossPercent;        // Percent of Amount lost when Timelock triggers or is canceled
+        uint8 LossPercent;          // Percent of Amount lost when Timelock triggers or is canceled
 
         address Creator;            // Address of the ticket creator
         address Payer;              // Address of the ticket filler
@@ -100,10 +96,8 @@ contract Sikker is Owner {
     uint256 public Withdrawable;
 
     //--------------------------------------  Fees
-    
-    uint8 Sending = 0;
-    uint8 Closing = 1;
-    uint8 Both = 2;
+
+    enum when_t {Sending, Closing, Both}
 
     uint32 public SendPercent;
     uint32 public SendDivider;
@@ -162,20 +156,14 @@ contract Sikker is Owner {
         ClosDivider = 100;
     }
 
-    function ChangeFees(
-        uint8 _when,
-        uint8 _percent,
-        uint8 _divider)
-        public isOwner() {
-
-        require(_when == Sending || _when == Closing || _when == Both, "ChangeFees: _when is neither 0 or 1");
-        if (_when == Sending) {
+    function ChangeFees(when_t _when, uint8 _percent, uint8 _divider) public isOwner() {
+        if (_when == when_t.Sending) {
             SendPercent = _percent;
             SendDivider = _divider;
-        } else if (_when == Closing) {
+        } else if (_when == when_t.Closing) {
             ClosPercent = _percent;
             ClosDivider = _divider;
-        } else if (_when == Both) {
+        } else if (_when == when_t.Both) {
             SendPercent = _percent;
             SendDivider = _divider;
             ClosPercent = _percent;
@@ -183,31 +171,21 @@ contract Sikker is Owner {
         }
     }
 
-    function ChangeDiscount(
-        uint256 _triggerAmount,
-        uint8 _discount)
-        public isOwner() {
-
-        require(_triggerAmount > 100000 && _discount >= 0, "ChangeDiscount: wrong arguments");
+    function ChangeDiscount(uint256 _triggerAmount, uint8 _discount) public isOwner() {
+        require(_triggerAmount > 100000, "ChangeDiscount: wrong arguments");
 
         DiscountTrigger = _triggerAmount;
         Discount = _discount;
     }
 
-    function PayTheDevs(
-        uint256 _amount,
-        address payable _receiver)
-        public isOwner() {
-        
+    function PayTheDevs(uint256 _amount, address payable _receiver) public isOwner() {
         if (Withdrawable == 0)
             Withdrawable = SikkerProfit.sub(WddProfit);
 
         require(_amount > 0 && _amount <= Withdrawable, "PayTheDevs: _amount is null or higher than Sikker's profit");
-    
+
         if (_receiver == Dead)
             _receiver = payable(msg.sender);
-
         _receiver.transfer(_amount);
     }
-
 }
