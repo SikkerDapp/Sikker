@@ -191,7 +191,7 @@ contract UseTickets is SikkerStats, CreateTickets {
 
 //------------------------------------------------- Lock functions
 
-    function _LockCE(uint256 _id) public 
+    function _LockCE(uint256 _id) public
         IdCheck(isCE, _id)
         StatusCheck(_CE_Tickets[_id].Status, isCE)
         returns(bool) {

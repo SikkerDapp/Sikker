@@ -84,10 +84,10 @@ contract Sikker is Owner {
     uint8 Birth = 0;
     uint8 Death = 1;
     uint8 NONE = 3;
-    
+
     bool Checkin = true;
     bool Nocheck = false;
-    
+
     address Dead = 0x000000000000000000000000000000000000dEaD;
 
 //--------------------------------------  tickets
@@ -126,7 +126,7 @@ contract Sikker is Owner {
     uint256 Withdrawable;
 
 //--------------------------------------  Fees
-    
+
     uint8 Sending = 0;
     uint8 Closing = 1;
     uint8 Both = 2;
@@ -223,12 +223,12 @@ contract Sikker is Owner {
         uint256 _amount,
         address payable _receiver)
         public isOwner() {
-        
+
         if (Withdrawable == 0)
             Withdrawable = SikkerProfit.sub(WddProfit);
 
         require(_amount > 0 && _amount <= Withdrawable, "PayTheDevs: _amount is null or higher than Sikker's profit");
-    
+
         if (_receiver == Dead)
             _receiver = payable(msg.sender);
 

@@ -15,7 +15,7 @@ contract SikkerStats is SikkerMaths {
         uint8 _birthDeath,
         uint8 _newStatus)
         internal {
-            
+
         SikkerProfit = SikkerProfit.add(_TMM_Tickets[_id].Amount.sub(_amount));
 
         if (_lockUnlock == Unlocked) {
@@ -33,7 +33,7 @@ contract SikkerStats is SikkerMaths {
         _TMM_Tickets[_id].Status = _newStatus;
 
     }
-    
+
     function UpdateStatsCE(
         uint256 _id,
         uint8 _lockUnlock,
