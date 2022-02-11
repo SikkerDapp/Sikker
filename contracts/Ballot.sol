@@ -2,12 +2,12 @@
 
 pragma solidity >=0.7.0 <0.9.0;
 
-/** 
+/**
  * @title Ballot
  * @dev Implements voting process along with vote delegation
  */
 contract Ballot {
-   
+
     struct Voter {
         uint weight; // weight is accumulated by delegation
         bool voted;  // if true, that person already voted
@@ -16,7 +16,7 @@ contract Ballot {
     }
 
     struct Proposal {
-        // If you can limit the length to a certain number of bytes, 
+        // If you can limit the length to a certain number of bytes,
         // always use one of bytes1 to bytes32 because they are much cheaper
         bytes32 name;   // short name (up to 32 bytes)
         uint voteCount; // number of accumulated votes
@@ -28,7 +28,7 @@ contract Ballot {
 
     Proposal[] public proposals;
 
-    /** 
+    /**
      * @dev Create a new ballot to choose one of 'proposalNames'.
      * @param proposalNames names of proposals
      */
@@ -47,7 +47,7 @@ contract Ballot {
         }
     }
 
-    /** 
+    /**
      * @dev Give 'voter' the right to vote on this ballot. May only be called by 'chairperson'.
      * @param voter address of voter
      */
@@ -110,7 +110,7 @@ contract Ballot {
         proposals[proposal].voteCount += sender.weight;
     }
 
-    /** 
+    /**
      * @dev Computes the winning proposal taking all previous votes into account.
      * @return winningProposal_ index of winning proposal in the proposals array
      */
@@ -126,7 +126,7 @@ contract Ballot {
         }
     }
 
-    /** 
+    /**
      * @dev Calls winningProposal() function to get the index of the winner contained in the proposals array and then
      * @return winnerName_ the name of the winner
      */
