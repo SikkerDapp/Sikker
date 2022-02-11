@@ -8,77 +8,14 @@ contract SikkerStats is SikkerMaths {
     using SafeMath for uint256;
     using SafeMath for uint32;
 
-    function UpdateStatsTMM(
-        uint256 _id,
-        uint8 _lockUnlock,
-        uint256 _amount,
-        uint8 _birthDeath,
-        uint8 _newStatus)
-        internal {
-
-        SikkerProfit = SikkerProfit.add(_TMM_Tickets[_id].Amount.sub(_amount));
-
-        if (_lockUnlock == Unlocked) {
-            TMM_ValueUnLocked = TMM_ValueUnLocked.add(_amount);
-            SikkerProfit = SikkerProfit.add(_TMM_Tickets[_id].Amount.sub(_amount));
-        } else
-            TMM_ValueEverLocked = TMM_ValueEverLocked.add(_amount);
-
-        if (_birthDeath == Birth) {
-            TMM_Ticket_Number = OneUp(TMM_Ticket_Number);
-        } else if (_birthDeath == Death) {
-            TMM_Inactive_Ticket_Number = OneUp(TMM_Inactive_Ticket_Number);
-        }
-
-        _TMM_Tickets[_id].Status = _newStatus;
-
-    }
-
-    function UpdateStatsCE(
-        uint256 _id,
-        uint8 _lockUnlock,
-        uint256 _amount,
-        uint256 _atyAmount,
-        uint8 _birthDeath,
-        uint8 _newStatus)
-        internal {
-
-
-        if (_amount > 0)
-            SikkerProfit = SikkerProfit.add(_CE_Tickets[_id].Amount.sub(_amount));
-
-        if (_lockUnlock == Unlocked) {
-            CE_ValueUnLocked = CE_ValueUnLocked.add(_amount);
-            SikkerProfit = SikkerProfit.add(_TMM_Tickets[_id].Amount.sub(_amount));
-        } else if (_lockUnlock == Locked) {
-            CE_ValueEverLocked = CE_ValueEverLocked.add(_amount);
-        } else if (_lockUnlock == Both) {
-            CE_ValueEverLocked = CE_ValueEverLocked.add(_amount);
-            CE_ValueUnLocked = CE_ValueUnLocked.add(_atyAmount);
-            SikkerProfit = SikkerProfit.add(_TMM_Tickets[_id].Amount.sub(_atyAmount));
-        }
-        if (_birthDeath == Birth)
-            CE_Ticket_Number = OneUp(CE_Ticket_Number);
-        else
-            CE_Inactive_Ticket_Number = OneUp(CE_Inactive_Ticket_Number);
-
-        _CE_Tickets[_id].Status = _newStatus;
-
-    }
-
     function CurrentlyLockedValue() private view returns(uint256) {
 
         uint256 total = 0;
 
-        for (uint256 i = 0; i != CE_Ticket_Number; i++) {
-            if (_CE_Tickets[i].Status == 1)
-                total = total.add(_CE_Tickets[i].Amount);
+        for (uint256 i = 0; i != tickets.length; i++) {
+            if (tickets[i].Status == 1)
+                total = total.add(tickets[i].Amount);
         }
-        for (uint256 i = 0; i != TMM_Ticket_Number; i++) {
-            if (_TMM_Tickets[i].Status == 0)
-                total = total.add(_TMM_Tickets[i].Amount);
-        }
-
         return (total);
     }
 

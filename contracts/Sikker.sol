@@ -13,10 +13,10 @@
 @#         ,@@@@@@@@@@@@@@@@@@@@@      ,@@@@@@@@@       @@@@@@@@%      %@@      ,@@@@@@@@        @@@@@@@@,        ..        .@@@@@@@@,      (        |
 @@@*            ,%@@@@@@@@@@@@@@@      ,@@@@@@@@@@@       @@@@@@%      %@@      ,@@@@@@        @@@@@@@@,      ,@@@@@@@@,      ,@@@@@@,         ,@@@@@
 @@@@@@#,            ,@@@@@@@@@@@@      ,@@@@@@@@@@@@@       @@@@%      %@@      ,@@@@        @@@@@@@@@,     .@@@@@@@@@@@@      @@@@@@,       ,@@@@@
-      @@@@@,.          ,@@@@@@@@@      ,@@@@@@@@@@@@@@@       @@%      %@@      ,@@       %@@@@@@@@@@(      ,,,,,,,,,,,,,,     ,@@@@@,      ,@@@@@
-          @@@@@@,        ,@@@@@@@      ,@@@@@@@@@@@@@@@@@      @%      %@@      ,@      @@@@@@@@@@@@@,                         ,@@@@@,      (@@@@@
-            @@@@@@#       &@@@@@@      ,@@@@@@@@@@@@@@@       @@%      %@@      ,@@        @@@@@@@@@@,      ,*******************@@@@@,      (@@@@@
-             @@@@@@,      ,@@@@@@      ,@@@@@@@@@@@@@       @@@@%      %@@      ,@@@@        @@@@@@@@@      ,@@@@@@@@@@@@@@@@@@@@@@@@,      (@@@@@
+@@@@@@@@@@@,.          ,@@@@@@@@@      ,@@@@@@@@@@@@@@@       @@%      %@@      ,@@       %@@@@@@@@@@(      ,,,,,,,,,,,,,,     ,@@@@@,      ,@@@@@
+@@@@@@@@@@@@@@@@,        ,@@@@@@@      ,@@@@@@@@@@@@@@@@@      @%      %@@      ,@      @@@@@@@@@@@@@,                         ,@@@@@,      (@@@@@
+@@@@@@@@@@@@@@@@@@#       &@@@@@@      ,@@@@@@@@@@@@@@@       @@%      %@@      ,@@        @@@@@@@@@@,      ,*******************@@@@@,      (@@@@@
+@@@@@@@@@@@@@@@@@@@,      ,@@@@@@      ,@@@@@@@@@@@@@       @@@@%      %@@      ,@@@@        @@@@@@@@@      ,@@@@@@@@@@@@@@@@@@@@@@@@,      (@@@@@
 , ,@@@@@@@@@@@@@@@,       @@@@@@@      ,@@@@@@@@@@&       @@@@@@%      %@@      ,@@@@@@        @@@@@@@,      ,@@@@@@@@@@@@@@@,@@@@@@@,      (@@@@@
 |       .,,,,,          ,@@@@@@@@      ,@@@@@@@@        @@@@@@@@%      %@@      ,@@@@@@@@        @@@@@@%        .,,@@@@,,,   ,@@@@@@@,      (@@@@@
 |                     ,@@@@@@@@@@      ,@@@@@@        @@@@@@@@@@%      %@@      ,@@@@@@@@@@        @@@@@@&,                  ,@@@@@@@,      (@@@@@
@@ -57,122 +57,99 @@ They are three types of tickets:
 
 pragma solidity >=0.7.0 <0.9.0;
 
-import "@openzeppelin/contracts/utils/math/SafeMath.sol";
+
 import "./Owner.sol";
+import "./maths/SafeMath.sol";
 
 contract Sikker is Owner {
     using SafeMath for uint256;
 
-//--------------------------------------  Backbone & stats
+    //--------------------------------------  Stats
 
-    uint256 CE_Ticket_Number;
-    uint256 CE_Inactive_Ticket_Number;
-    uint256 CE_ValueEverLocked;
-    uint256 CE_ValueUnLocked;
-
-    uint256 TMM_Ticket_Number;
-    uint256 TMM_Inactive_Ticket_Number;
-    uint256 TMM_ValueEverLocked;
-    uint256 TMM_ValueUnLocked;
-
-    uint8 isCE = 0;
-    uint8 isTMM = 1;
-
-    uint8 Unlocked = 0;
-    uint8 Locked = 1;
-    uint8 Birth = 0;
-    uint8 Death = 1;
-    uint8 NONE = 3;
-
+    
     bool Checkin = true;
     bool Nocheck = false;
-
+    
     address Dead = 0x000000000000000000000000000000000000dEaD;
 
-//--------------------------------------  tickets
+    //--------------------------------------  tickets
 
-    struct CE_Ticket {
-        uint256 Amount; // Amount of Eth wich the ticket is about.
-        uint256 TimeLock; // Date (in seconds) when the ticket will close automatically, keeping 'LossPercent * Amount' Eth in the smartcontract, if ticket is filled.
-        uint8 Status; // Status of the ticket: For CE {0 = open, 1 = wainting for approval, 2 = closed, 3 = time_locked} For ATY {0 = open, 1 = half sent, 2 = closed, 3 = time_locked}.
-        uint8 LossPercent; // % of Amount that will be loss when TimeLock is reached. If void, LossPercent = 30.
-        bool Aty; // Is an "AlmostTrustYou" or not.
-        address Payer; // Address of the person wich sends Eth to Sikker.
-        address Receiver; // Address of the person wich will receive Eth from Sikker.
-        address Creator; // addressof the person who created the ticket.
-        bytes32 Hash; // Hash to be compared with keyword to unlock payment.
+    enum type_t {CE, TMM}
+
+    struct Ticket {
+        type_t Type;                // Type of the ticket: True = CE, False = TMM
+        uint256 Amount;             // Amount of wei locked in ticket
+        uint256 Timelock;           // Date in seconds when the ticket expires
+        uint256 LossPercent;        // Percent of Amount lost when Timelock triggers or is canceled
+
+        address Creator;            // Address of the ticket creator
+        address Payer;              // Address of the ticket filler
+        address payable Receiver;   // Address of the ticket's Amount destination
+
+        bytes32 Hash;               // Hash of the ticket password
+        bool Specificity;           // Specify if: CE ticket is ATY / TMM ticket has a designated Receiver
+        uint8 Status;               // Health status of the ticket, 0 = newborn, 1 = filled
     }
 
-    struct TMM_Ticket {
-        uint256 Amount; // Amount of Eth wich the ticket is about.
-        uint256 TimeLock; // Date (in seconds) when the ticket will close automatically, keeping LossPercent * Amount Eth in the smartcontract.
-        uint8 Status; // Status of the ticket: 0 = open, 1 = closed, 2 = time_locked;
-        uint8 LossPercent; // % of Amount that will be loss when TimeLock is reached. If void, LossPercent = 70.
-        bool DeRe;  // If Receiver is designated on the ticket's creation.
-        address payable Receiver; // Address of the person wich will receive Eth from Sikker.
-        address Creator; // addressof the person who created the ticket, wich also is Payer.
-        bytes32 Hash; // Hash to be compared with keyword to unlock payment.
-    }
+    Ticket[] public tickets;
 
+    //--------------------------------------  Leading
 
-    CE_Ticket[] public _CE_Tickets;
-    TMM_Ticket[] public _TMM_Tickets;
+    uint256 public SikkerProfit;
+    uint256 public WddProfit;
+    uint256 public Withdrawable;
 
-//--------------------------------------  Leading
-
-    uint256 SikkerProfit;
-    uint256 WddProfit;
-    uint256 Withdrawable;
-
-//--------------------------------------  Fees
-
+    //--------------------------------------  Fees
+    
     uint8 Sending = 0;
     uint8 Closing = 1;
     uint8 Both = 2;
 
-    uint32   SendPercent;
-    uint32   SendDivider;
-    uint32   ClosPercent;
-    uint32   ClosDivider;
+    uint32 public SendPercent;
+    uint32 public SendDivider;
+    uint32 public ClosPercent;
+    uint32 public ClosDivider;
 
     uint256 DiscountTrigger;
     uint8 Discount;
 
-//--------------------------------------  Events
+    //--------------------------------------  Events
+
+    event LockValue(uint256 indexed _id, uint256 _amount);
+
+    event UnlockValue(uint256 indexed _id, uint256 _amount);
 
     event CreatedTicket(
         uint256 _id,
-        string _type,
+        type_t indexed _type,
+        bool _specificity,
         uint256 _amount,
         address _creator,
-        bool _designatedReceiver,
         address _receiver,
         uint8 _lossPercent
     );
 
-    event FilledCE(
+    event FilledTicket(
         uint256 _id,
         uint256 _amount,
-        address _creator,
         address _payer,
-        address _receiver
+        type_t indexed _type
     );
 
     event SentHalfATY(
         uint256 _id,
-        uint256 _totalAmount,
         uint256 _sentAmount,
-        address _creator,
-        address _payer,
-        address _receiver
+        address indexed _creator,
+        address indexed _payer,
+        address indexed _receiver
     );
 
     event ClosedTicket(
         uint256 _id,
-        string _type,
+        type_t indexed _type,
         uint256 _amount,
-        address _payer,
-        bool _isTimeBlocked,
+        address indexed _payer,
+        bool indexed _isTimeBlocked,
         uint8 _lostPercent
     );
 
@@ -184,7 +161,6 @@ contract Sikker is Owner {
         ClosPercent = 99;
         ClosDivider = 100;
     }
-
 
     function ChangeFees(
         uint8 _when,
@@ -222,12 +198,12 @@ contract Sikker is Owner {
         uint256 _amount,
         address payable _receiver)
         public isOwner() {
-
+        
         if (Withdrawable == 0)
             Withdrawable = SikkerProfit.sub(WddProfit);
 
         require(_amount > 0 && _amount <= Withdrawable, "PayTheDevs: _amount is null or higher than Sikker's profit");
-
+    
         if (_receiver == Dead)
             _receiver = payable(msg.sender);
 
