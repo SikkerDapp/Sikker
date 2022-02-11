@@ -1,4 +1,5 @@
+Close CE ticket before getting paid
+Lock CE by owner with bad timing
 UpdateStats calls V
-TMM interaction: lock is broken
 percent for big volumes
 Sikker profit is double what it should be
