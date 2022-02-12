@@ -11,7 +11,7 @@ contract SikkerStats is SikkerMaths, Sikker {
         uint256 total = 0;
 
         for (uint256 i = 0; i < tickets.length; i++)
-            if (tickets[i].Status == 1)
+            if (tickets[i].Status == status_t.Filled)
                 total = total.add(tickets[i].Amount);
         return total;
     }

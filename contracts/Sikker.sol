@@ -70,10 +70,11 @@ contract Sikker is Owner {
 
     //--------------------------------------  tickets
 
+    enum status_t {New, Filled, Closed}
     enum type_t {CE, TMM}
 
     struct Ticket {
-        type_t Type;                // Type of the ticket: True = CE, False = TMM
+        type_t Type;                // Type of the ticket
         uint256 Amount;             // Amount of wei locked in ticket
         uint256 TimeLock;           // Date in seconds when the ticket expires
         uint8 LossPercent;          // Percent of Amount lost when TimeLock triggers or is canceled
@@ -84,7 +85,7 @@ contract Sikker is Owner {
 
         bytes32 Hash;               // Hash of the ticket password
         bool Specificity;           // Specify if: CE ticket is ATY / TMM ticket has a designated Receiver
-        uint8 Status;               // Health status of the ticket, 0 = newborn, 1 = filled
+        status_t Status;            // Health status of the ticket
     }
 
     Ticket[] public tickets;
@@ -164,7 +165,7 @@ contract Sikker is Owner {
         sendingTax.divider = 10000;
         closingTax.percent = 99;
         closingTax.divider = 100;
-        tickets.push(Ticket (type_t(0), 0, 0, 0, Dead, Dead, payable(Dead), 0x044852b2a670ade5407e78fb2863c51de9fcb96542a07186fe3aeda6bb8a116d, false, 0));
+        tickets.push(Ticket(type_t(0), 0, 0, 0, Dead, Dead, payable(Dead), 0x044852b2a670ade5407e78fb2863c51de9fcb96542a07186fe3aeda6bb8a116d, false, status_t.Closed));
     }
 
     function changeFees(when_t _when, uint8 _percent, uint8 _divider) public isOwner() {
