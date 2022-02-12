@@ -41,15 +41,15 @@ Sikker is a decentralised escrow (third-party) platform, an algorythm you can tr
 Use:   Create a ticket that your commercial partner will fill or collect.
 
 They are three types of tickets:
-   - CE tickets = CLassic Escrow ticket, seller creates one with defined needed amount,
-    defined timelock, percentage of the ticket lost if timelock is reached,
+  - CE tickets = Classic Escrow ticket, seller creates one with defined needed amount,
+    defined timeLock, percentage of the ticket lost if timeLock is reached,
     defined receiver (should be the creator unless it is used by a fourth-party)
 
-   - ATY tickets = Almost Trust You ticket, exactly like a CE but when money is
+  - ATY tickets = Almost Trust You ticket, exactly like a CE but when money is
     sent to the ticket, half of it is directly sent to the seller.
     *** !!! PLEASE BE CAUTIONOUS, OR CREATE TICKET AS CUSTOMER TO AVOID FIRST-PAYMENT ABUSE !!! ***
 
-   - TMM tickets = Take My Money ticket, basically a password-protected money bag
+  - TMM tickets = Take My Money ticket, basically a password-protected money bag
     threw in the blockchain. Make sure not to lose your password.
 
 **/
@@ -75,8 +75,8 @@ contract Sikker is Owner {
     struct Ticket {
         type_t Type;                // Type of the ticket: True = CE, False = TMM
         uint256 Amount;             // Amount of wei locked in ticket
-        uint256 Timelock;           // Date in seconds when the ticket expires
-        uint8 LossPercent;          // Percent of Amount lost when Timelock triggers or is canceled
+        uint256 TimeLock;           // Date in seconds when the ticket expires
+        uint8 LossPercent;          // Percent of Amount lost when TimeLock triggers or is canceled
 
         address Creator;            // Address of the ticket creator
         address Payer;              // Address of the ticket filler
@@ -97,7 +97,7 @@ contract Sikker is Owner {
 
     //--------------------------------------  Fees
 
-    enum when_t {Sending, Closing, Both}
+    enum when_t {Sending, Closing, Both}    // If you change that, you NEED to check changeFees function
 
     uint32 public SendPercent;
     uint32 public SendDivider;
@@ -156,29 +156,25 @@ contract Sikker is Owner {
         ClosDivider = 100;
     }
 
-    function ChangeFees(when_t _when, uint8 _percent, uint8 _divider) public isOwner() {
-        if (_when == when_t.Sending) {
+    function changeFees(when_t _when, uint8 _percent, uint8 _divider) public isOwner() {
+        if (_when != when_t.Closing) {
             SendPercent = _percent;
             SendDivider = _divider;
-        } else if (_when == when_t.Closing) {
-            ClosPercent = _percent;
-            ClosDivider = _divider;
-        } else if (_when == when_t.Both) {
-            SendPercent = _percent;
-            SendDivider = _divider;
+        }
+        if (_when != when_t.Sending) {
             ClosPercent = _percent;
             ClosDivider = _divider;
         }
     }
 
-    function ChangeDiscount(uint256 _triggerAmount, uint8 _discount) public isOwner() {
+    function changeDiscount(uint256 _triggerAmount, uint8 _discount) public isOwner() {
         require(_triggerAmount > 100000, "ChangeDiscount: wrong arguments");
 
         DiscountTrigger = _triggerAmount;
         Discount = _discount;
     }
 
-    function PayTheDevs(uint256 _amount, address payable _receiver) public isOwner() {
+    function payTheDevs(uint256 _amount, address payable _receiver) public isOwner() {
         if (Withdrawable == 0)
             Withdrawable = SikkerProfit.sub(WddProfit);
 

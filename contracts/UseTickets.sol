@@ -34,12 +34,7 @@ contract UseTickets is SikkerStats, CreateTickets {
         _;
     }
 
-    modifier timelockCheck(uint256 _id) {
-        require (lockTicket(_id), "Ticket is timelocked!");
-        _;
-    }
-
-    function fillCE(string memory _passwd, uint256 _id) public payable idCheck(_id) passwdCheck(_passwd, tickets[_id].Hash) timelockCheck(_id) returns(string memory timelocked) {
+    function fillCE(string memory _passwd, uint256 _id) public payable idCheck(_id) passwdCheck(_passwd, tickets[_id].Hash) timeCheck(tickets[_id].TimeLock) returns(string memory timelocked) {
         Ticket memory ticket = tickets[_id];
         uint256 amount = percentage(SendPercent, ticket.Amount, SendDivider);
 
@@ -51,7 +46,7 @@ contract UseTickets is SikkerStats, CreateTickets {
         return("Ticket is now filled.");
     }
 
-    function approveCE(uint256 _id) public idCheck(_id) onlyPayer(tickets[_id].Payer) timeCheck(tickets[_id].Timelock) returns(string memory locked) {
+    function approveCE(uint256 _id) public idCheck(_id) onlyPayer(tickets[_id].Payer) timeCheck(tickets[_id].TimeLock) returns(string memory locked) {
         Ticket memory ticket = tickets[_id];
         uint256 amount = percentage(SendPercent, ticket.Amount, SendDivider);
 
@@ -62,7 +57,7 @@ contract UseTickets is SikkerStats, CreateTickets {
         return "Ticket is now closed.";
     }
 
-    function useTMM(string memory _passwd, uint256 _id) public idCheck(_id) onlyReceiver(tickets[_id]) passwdCheck(_passwd, tickets[_id].Hash) timelockCheck(_id) returns(string memory timelocked) {
+    function useTMM(string memory _passwd, uint256 _id) public idCheck(_id) onlyReceiver(tickets[_id]) passwdCheck(_passwd, tickets[_id].Hash) timeCheck(tickets[_id].TimeLock) returns(string memory timelocked) {
         Ticket memory ticket = tickets[_id];
         uint256 amount = percentage(SendPercent, ticket.Amount, SendDivider);
 
@@ -75,7 +70,7 @@ contract UseTickets is SikkerStats, CreateTickets {
         return "Ticket is now closed";
     }
 
-    function closeTicket(uint256 _id) public idCheck(_id) onlyPayer(tickets[_id].Creator) timelockCheck(tickets[_id].Timelock) returns (string memory locked) {
+    function closeTicket(uint256 _id) public idCheck(_id) onlyPayer(tickets[_id].Creator) timeCheck(tickets[_id].TimeLock) returns (string memory locked) {
         Ticket memory ticket = tickets[_id];
         uint256 amount;
 
@@ -93,7 +88,7 @@ contract UseTickets is SikkerStats, CreateTickets {
         Ticket memory ticket = tickets[_id];
         uint256 amount;
 
-        if (ticket.Timelock <= 0 || ticket.Timelock > block.timestamp)
+        if (ticket.TimeLock <= 0 || ticket.TimeLock > block.timestamp)
             return false;
         if (ticket.LossPercent == 0)
             amount = percentage(ClosPercent, ticket.Amount, ClosDivider);
