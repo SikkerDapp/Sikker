@@ -29,74 +29,79 @@ contract UseTickets is SikkerStats, CreateTickets {
         _;
     }
 
-    modifier timeCheck(uint256 _lock) {
-        require(_lock != 0 || _lock > block.timestamp, "timeCheck: Ticket is locked");
+    modifier timeCheck(uint256 _id) {
+        require(lockTicket(_id), "timeCheck: Ticket is locked");
         _;
     }
 
-    function fillCE(string memory _passwd, uint256 _id) public payable idCheck(_id) passwdCheck(_passwd, tickets[_id].Hash) timeCheck(tickets[_id].TimeLock) returns(string memory timelocked) {
-        Ticket memory ticket = tickets[_id];
-        uint256 amount = percentage(SendPercent, ticket.Amount, SendDivider);
+    function fillCE(string memory _passwd, uint256 _id) public payable idCheck(_id) passwdCheck(_passwd, tickets[_id].Hash) timeCheck(_id) returns(string memory fill) {
+        uint256 amount = percentage(sendingTax.percent, tickets[_id].Amount, sendingTax.divider);
 
-        require(msg.value >= ticket.Amount, "_UseCE: Not enough value was sent");
+        require(tickets[_id].Type == type_t.CE, "fillCE: A TMM ticket can not be filled.");
+        require(msg.value >= tickets[_id].Amount, "fillCE: Not enough value was sent");
+        emit LockValue(_id, msg.value);
 
-        ticket.Payer = msg.sender;
-        if (ticket.Specificity)
-            payable(ticket.Receiver).transfer(amount.div(2));
+        tickets[_id].Payer = msg.sender;
+        tickets[_id].Status = 1;
+        if (tickets[_id].Specificity) {
+            payable(tickets[_id].Receiver).transfer(amount.div(2));
+            emit UnlockValue(_id, amount.div(2));
+        }
         return("Ticket is now filled.");
     }
 
-    function approveCE(uint256 _id) public idCheck(_id) onlyPayer(tickets[_id].Payer) timeCheck(tickets[_id].TimeLock) returns(string memory locked) {
-        Ticket memory ticket = tickets[_id];
-        uint256 amount = percentage(SendPercent, ticket.Amount, SendDivider);
+    function approveCE(uint256 _id) public idCheck(_id) onlyPayer(tickets[_id].Payer) timeCheck(_id) returns(string memory locked) {
+        uint256 amount = percentage(sendingTax.percent, tickets[_id].Amount, sendingTax.divider);
 
-        ticket.Status = 2;
-        if (ticket.Specificity)
+        tickets[_id].Status = 2;
+        if (tickets[_id].Specificity)
             amount = amount.div(2);
-        payable(ticket.Receiver).transfer(amount);
+        payable(tickets[_id].Receiver).transfer(amount);
         return "Ticket is now closed.";
     }
 
-    function useTMM(string memory _passwd, uint256 _id) public idCheck(_id) onlyReceiver(tickets[_id]) passwdCheck(_passwd, tickets[_id].Hash) timeCheck(tickets[_id].TimeLock) returns(string memory timelocked) {
-        Ticket memory ticket = tickets[_id];
-        uint256 amount = percentage(SendPercent, ticket.Amount, SendDivider);
+    function useTMM(string memory _passwd, uint256 _id) public idCheck(_id) onlyReceiver(tickets[_id]) passwdCheck(_passwd, tickets[_id].Hash) timeCheck(_id) returns(string memory timelocked) {
+        uint256 amount = percentage(sendingTax.percent, tickets[_id].Amount, sendingTax.divider);
 
-        if (!ticket.Specificity) {
-            ticket.Receiver = payable(msg.sender);
-            ticket.Specificity = true;
+        if (!tickets[_id].Specificity) {
+            tickets[_id].Status = 1;
+            tickets[_id].Receiver = payable(msg.sender);
+            tickets[_id].Specificity = true;
             return "msg.sender is now the designated receiver.";
         }
+        tickets[_id].Status = 2;
+        emit UnlockValue(_id, amount);
         payable(msg.sender).transfer(amount);
         return "Ticket is now closed";
     }
 
-    function closeTicket(uint256 _id) public idCheck(_id) onlyPayer(tickets[_id].Creator) timeCheck(tickets[_id].TimeLock) returns (string memory locked) {
-        Ticket memory ticket = tickets[_id];
+    function closeTicket(uint256 _id) public idCheck(_id) onlyPayer(tickets[_id].Creator) timeCheck(_id) returns (string memory locked) {
         uint256 amount;
 
-        if (ticket.LossPercent == 0)
-            amount = percentage(ClosPercent, ticket.Amount, ClosDivider);
+        if (tickets[_id].LossPercent == 0)
+            amount = percentage(closingTax.percent, tickets[_id].Amount, closingTax.divider);
         else
-            amount = percentage(ticket.LossPercent, ticket.Amount, 100);
-        if (ticket.Type == type_t.CE && ticket.Specificity)
+            amount = percentage(tickets[_id].LossPercent, tickets[_id].Amount, 100);
+        if (tickets[_id].Type == type_t.CE && tickets[_id].Specificity)
             amount = amount.div(2);
-        payable(ticket.Payer).transfer(amount);
+        tickets[_id].Status = 2;
+        payable(tickets[_id].Payer).transfer(amount);
+        emit UnlockValue(_id, amount);
         return "Ticket is now locked.";
     }
 
     function lockTicket(uint256 _id) public idCheck(_id) returns (bool) {
-        Ticket memory ticket = tickets[_id];
         uint256 amount;
 
-        if (ticket.TimeLock <= 0 || ticket.TimeLock > block.timestamp)
+        if (tickets[_id].TimeLock == 0 || tickets[_id].TimeLock > block.timestamp)
             return false;
-        if (ticket.LossPercent == 0)
-            amount = percentage(ClosPercent, ticket.Amount, ClosDivider);
-        else
-            amount = percentage(ticket.LossPercent, ticket.Amount, 100);
-        if (ticket.Type == type_t.CE && ticket.Specificity)
+        amount = percentage(tickets[_id].LossPercent, tickets[_id].Amount, 100);
+        amount = percentage(closingTax.percent, amount, closingTax.divider);
+        if (tickets[_id].Type == type_t.CE && tickets[_id].Specificity)
             amount = amount.div(2);
-        payable(ticket.Payer).transfer(amount);
+        payable(tickets[_id].Payer).transfer(amount);
+        emit UnlockValue(_id, amount);
+        emit CloseTicket(_id, tickets[_id].Type, true);
         return true;
     }
 }

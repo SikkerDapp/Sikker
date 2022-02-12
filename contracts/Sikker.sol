@@ -99,10 +99,13 @@ contract Sikker is Owner {
 
     enum when_t {Sending, Closing, Both}    // If you change that, you NEED to check changeFees function
 
-    uint32 public SendPercent;
-    uint32 public SendDivider;
-    uint32 public ClosPercent;
-    uint32 public ClosDivider;
+    struct tax_s {
+        uint32 percent;
+        uint32 divider;
+    }
+
+    tax_s sendingTax;
+    tax_s closingTax;
 
     uint256 DiscountTrigger;
     uint8 Discount;
@@ -138,46 +141,54 @@ contract Sikker is Owner {
         address indexed _receiver
     );
 
-    event ClosedTicket(
+    event CloseTicket(
         uint256 _id,
         type_t indexed _type,
-        uint256 _amount,
-        address indexed _payer,
-        bool indexed _isTimeBlocked,
-        uint8 _lostPercent
+        bool indexed _isTimeBlocked
     );
 
 //------------------------------------------------------------------------------  Functions  ----------------------------------------------------------------------------
 
+    fallback() external payable {
+        if (msg.value > 0)
+            emit LockValue (0, msg.value);
+    }
+
+    receive() external payable {
+        if (msg.value > 0)
+            emit LockValue (0, msg.value);
+    }
+
     constructor() {
-        SendPercent = 9999;
-        SendDivider = 10000;
-        ClosPercent = 99;
-        ClosDivider = 100;
+        sendingTax.percent = 9999;
+        sendingTax.divider = 10000;
+        closingTax.percent = 99;
+        closingTax.divider = 100;
+        tickets.push(Ticket (type_t(0), 0, 0, 0, Dead, Dead, payable(Dead), 0x044852b2a670ade5407e78fb2863c51de9fcb96542a07186fe3aeda6bb8a116d, false, 0));
     }
 
     function changeFees(when_t _when, uint8 _percent, uint8 _divider) public isOwner() {
         if (_when != when_t.Closing) {
-            SendPercent = _percent;
-            SendDivider = _divider;
+            sendingTax.percent = _percent;
+            sendingTax.divider = _divider;
         }
         if (_when != when_t.Sending) {
-            ClosPercent = _percent;
-            ClosDivider = _divider;
+            closingTax.percent = _percent;
+            closingTax.divider = _divider;
         }
     }
 
     function changeDiscount(uint256 _triggerAmount, uint8 _discount) public isOwner() {
-        require(_triggerAmount > 100000, "ChangeDiscount: wrong arguments");
+        require(_triggerAmount > 100000, "ChangeDiscount: trigger amount too low");
 
         DiscountTrigger = _triggerAmount;
         Discount = _discount;
     }
 
     function payTheDevs(uint256 _amount, address payable _receiver) public isOwner() {
+
         if (Withdrawable == 0)
             Withdrawable = SikkerProfit.sub(WddProfit);
-
         require(_amount > 0 && _amount <= Withdrawable, "PayTheDevs: _amount is null or higher than Sikker's profit");
 
         if (_receiver == Dead)
