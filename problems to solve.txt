@@ -1,5 +1,0 @@
-Close CE ticket before getting paid
-Lock CE by owner with bad timing
-UpdateStats calls V
-percent for big volumes
-Sikker profit is double what it should be
