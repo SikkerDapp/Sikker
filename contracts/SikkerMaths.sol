@@ -8,8 +8,10 @@ contract SikkerMaths {
     using SafeMath for uint32;
 
     function percentage(uint32 _multiplier, uint256 _amount, uint32 _divider) internal pure returns(uint256) {
-        require(_multiplier > 0 && _amount > 100000 && _divider > 0, "SikkerMath/Percentage: one of the arguments is null");
+        require(_divider > 0, "percentage: _divider can not be null.");
+        require(_amount >= _divider.mul(10), "percentage: _amount should be >= 10 times _divider.");
 
+        _multiplier = _multiplier == 0 ? 1 : _multiplier;
         return _multiplier.mul(_amount).div(_divider);
     }
 }

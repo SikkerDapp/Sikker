@@ -94,7 +94,6 @@ contract Sikker is Owner {
 
     uint256 public SikkerProfit;
     uint256 public WddProfit;
-    uint256 public Withdrawable;
 
     //--------------------------------------  Fees
 
@@ -186,14 +185,17 @@ contract Sikker is Owner {
         Discount = _discount;
     }
 
-    function payTheDevs(uint256 _amount, address payable _receiver) public isOwner() {
+    function howMuchWithdrawable() public view returns (uint256) {
+        return SikkerProfit - WddProfit;
+    }
 
-        if (Withdrawable == 0)
-            Withdrawable = SikkerProfit.sub(WddProfit);
-        require(_amount > 0 && _amount <= Withdrawable, "PayTheDevs: _amount is null or higher than Sikker's profit");
+    function payTheDevs(uint256 _amount, address payable _receiver) public isOwner() {
+        require(_amount > 0 && _amount <= howMuchWithdrawable(), "PayTheDevs: _amount is null or higher than Sikker's profit");
 
         if (_receiver == Dead)
             _receiver = payable(msg.sender);
+        WddProfit =  WddProfit.add(_amount);
         _receiver.transfer(_amount);
+        emit UnlockValue(0, _amount);
     }
 }
