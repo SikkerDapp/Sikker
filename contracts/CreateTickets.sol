@@ -12,15 +12,12 @@ import "./SikkerStats.sol";
 contract CreateTickets is SikkerStats {
     using SafeMath for uint256;
 
-    modifier posAmount(uint256 _amount) {
-        require(_amount > 10000, "You must enter a non-null amount");
+    modifier minAmount(uint256 _amount) {
+        require(_amount > 10000, "You require at least 10000 wei");
         _;
     }
 
-    function createTicket(type_t _type, bool _specificity, uint8 _lossPercent, uint256 _amount, address _receiver, uint256 _timeLock, bytes32 _hash) public payable {
-
-        require(_amount > 10000, "You must require > 10000 wei");
-
+    function createTicket(type_t _type, bool _specificity, uint8 _lossPercent, uint256 _amount, address _receiver, uint256 _timeLock, bytes32 _hash) minAmount(_amount) public payable {
         Ticket memory ticket;
 
         ticket = Ticket(_type,
