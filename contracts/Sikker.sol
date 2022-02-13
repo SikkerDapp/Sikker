@@ -101,8 +101,8 @@ contract Sikker is Owner {
     enum when_t {Sending, Closing, Both}    // If you change that, you NEED to check changeFees function
 
     struct tax_s {
-        uint32 percent;
-        uint32 divider;
+        uint24 percent;
+        uint24 divider;
     }
 
     tax_s sendingTax;
@@ -168,7 +168,7 @@ contract Sikker is Owner {
         tickets.push(Ticket(type_t(0), 0, 0, 0, Dead, Dead, payable(Dead), 0x044852b2a670ade5407e78fb2863c51de9fcb96542a07186fe3aeda6bb8a116d, false, status_t.Closed));
     }
 
-    function changeFees(when_t _when, uint8 _percent, uint8 _divider) public isOwner() {
+    function changeFees(when_t _when, uint24 _percent, uint24 _divider) public isOwner() {
         if (_when != when_t.Closing) {
             sendingTax.percent = _percent;
             sendingTax.divider = _divider;
