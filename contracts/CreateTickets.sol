@@ -20,7 +20,8 @@ contract CreateTickets is SikkerStats {
     function createTicket(type_t _type, bool _specificity, uint8 _lossPercent, uint256 _amount, address _receiver, uint256 _timeLock, bytes32 _hash) minAmount(_amount) public payable {
         Ticket memory ticket;
 
-        ticket = Ticket(_type,
+        ticket = Ticket(
+            _type,
             _amount,
             _timeLock != 0 ? block.timestamp.add(_timeLock) : 0,
             _lossPercent > 1 && _lossPercent <= 100 ? _lossPercent : 15,
