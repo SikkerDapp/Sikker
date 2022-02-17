@@ -9,13 +9,9 @@ pragma solidity >=0.7.0 <0.9.0;
 
 import "./SikkerStats.sol";
 
-contract CreateTickets is SikkerStats {
+contract CreateTickets is Sikker, SikkerStats {
     using SafeMath for uint256;
 
-    modifier minAmount(uint256 _amount) {
-        require(_amount > 10000, "You require at least 10000 wei");
-        _;
-    }
 
     function createTicket(type_t _type, bool _specificity, uint8 _lossPercent, uint256 _amount, address _receiver, uint256 _timeLock, bytes32 _hash) minAmount(_amount) public payable {
         Ticket memory ticket;

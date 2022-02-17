@@ -66,7 +66,7 @@ contract Sikker is Owner {
 
     enum checking_t {Checking, NoCheck}
 
-    address Dead = 0x000000000000000000000000000000000000dEaD;
+    address constant Dead = 0x000000000000000000000000000000000000dEaD;
 
     //--------------------------------------  tickets
 
@@ -147,16 +147,21 @@ contract Sikker is Owner {
         bool indexed _isTimeBlocked
     );
 
+    modifier minAmount(uint256 _amount) {
+        require(_amount > 10000, "You require at least 10000 wei");
+        _;
+    }
+
 //------------------------------------------------------------------------------  Functions  ----------------------------------------------------------------------------
 
     fallback() external payable {
         if (msg.value > 0)
-            emit LockValue (0, msg.value);
+            emit LockValue(0, msg.value);
     }
 
     receive() external payable {
         if (msg.value > 0)
-            emit LockValue (0, msg.value);
+            emit LockValue(0, msg.value);
     }
 
     constructor() {
@@ -178,19 +183,17 @@ contract Sikker is Owner {
         }
     }
 
-    function changeDiscount(uint256 _triggerAmount, uint8 _discount) public isOwner() {
-        require(_triggerAmount > 100000, "ChangeDiscount: trigger amount too low");
-
+    function changeDiscount(uint256 _triggerAmount, uint8 _discount) public minAmount(_triggerAmount) isOwner() {
         DiscountTrigger = _triggerAmount;
         Discount = _discount;
     }
 
-    function howMuchWithdrawable() public view returns (uint256) {
+    function getWithdrawable() public view returns (uint256) {
         return SikkerProfit - WddProfit;
     }
 
     function payTheDevs(uint256 _amount, address payable _receiver) public isOwner() {
-        require(_amount > 0 && _amount <= howMuchWithdrawable(), "PayTheDevs: _amount is null or higher than Sikker's profit");
+        require(_amount > 0 && _amount <= getWithdrawable(), "PayTheDevs: _amount is null or higher than Sikker's profit");
 
         if (_receiver == Dead)
             _receiver = payable(msg.sender);
