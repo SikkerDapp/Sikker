@@ -7,6 +7,25 @@ import "./CreateTickets.sol";
 contract UseTickets is SikkerStats, CreateTickets {
     using SafeMath for uint256;
     using SafeMath for uint32;
+    using SafeMath for uint8;
+
+
+    // -------------------------------------------- PERCENTAGE
+
+    function percentage(uint32 _multiplier, uint256 _amount, uint32 _divider) internal view returns(uint256) {
+        require(_amount >= _divider.mul(10), "percentage: _amount should be at least 10 times _divider.");
+
+        uint256 net = _amount;
+        uint256 tax;
+    
+        _multiplier = _multiplier == 0 ? 1 : _multiplier;
+        net = _multiplier.mul(_amount).div(_divider, "percentage: div by 0");
+        tax = net.sub(_amount);
+        if (_amount < DiscountTrigger)
+            return net;
+        else
+            return net.add(Discount.mul(tax).div(100));
+    }
 
     //  -------------------------------------------  Modifiers
 
@@ -44,15 +63,15 @@ contract UseTickets is SikkerStats, CreateTickets {
     //  -------------------------------------------  Functions
 
     function fillCE(string memory _passwd, uint256 _id) public payable idCheck(_id) passwdCheck(_passwd, tickets[_id].Hash) timeCheck(_id) onlyType(type_t.CE, _id) returns(string memory fill) {
-        uint256 amount = percentage(sendingTax.percent, tickets[_id].Amount.div(2), sendingTax.divider);
-
+        uint256 amount;
         require(tickets[_id].Status == status_t.New, "fillCE: Ticket already filled.");
         require(msg.value >= tickets[_id].Amount, "fillCE: Not enough value was sent");
 
         emit LockValue(_id, msg.value);
         tickets[_id].Payer = msg.sender;
         tickets[_id].Status = status_t.Filled;
-        if (tickets[_id].Specificity) {
+        if (tickets[_id].Specificity == true) {
+            amount = percentage(sendingTax.percent, tickets[_id].Amount.div(2), sendingTax.divider);
             payable(tickets[_id].Receiver).transfer(amount);
             SikkerProfit = SikkerProfit.add(tickets[_id].Amount.div(2).sub(amount));
             emit UnlockValue(_id, amount.div(2));
@@ -60,56 +79,54 @@ contract UseTickets is SikkerStats, CreateTickets {
         return("Ticket is now filled.");
     }
 
-    function approveCE(uint256 _id) public idCheck(_id) onlyPayer(tickets[_id].Payer) timeCheck(_id) onlyType(type_t.CE, _id) returns(string memory locked) {
+    function approveCE(uint256 _id) public idCheck(_id) onlyPayer(tickets[_id].Payer) timeCheck(_id) onlyType(type_t.CE, _id) {
         uint256 amount = percentage(sendingTax.percent, tickets[_id].Amount, sendingTax.divider);
         uint256 rawAmount = tickets[_id].Amount;
 
         require (tickets[_id].Status == status_t.Filled, "approveCE: Can not approve an empty ticket.");
         tickets[_id].Status = status_t.Closed;
-        if (tickets[_id].Specificity) {
+        if (tickets[_id].Specificity == true) {
             rawAmount = rawAmount.div(2);
             amount = amount.div(2);
         }
         payable(tickets[_id].Receiver).transfer(amount);
         SikkerProfit = SikkerProfit.add(rawAmount.sub(amount));
-        return "Ticket is now closed.";
     }
 
-    function useTMM(string memory _passwd, uint256 _id) public idCheck(_id) onlyReceiver(tickets[_id]) passwdCheck(_passwd, tickets[_id].Hash) timeCheck(_id) onlyType(type_t.TMM, _id) returns(string memory timelocked) {
+    function useTMM(string memory _passwd, uint256 _id) public idCheck(_id) onlyReceiver(tickets[_id]) passwdCheck(_passwd, tickets[_id].Hash) timeCheck(_id) onlyType(type_t.TMM, _id) {
         uint256 amount = percentage(sendingTax.percent, tickets[_id].Amount, sendingTax.divider);
 
-        if (!tickets[_id].Specificity) {
+        if (!tickets[_id].Specificity == true) {
             tickets[_id].Status = status_t.Filled;
             tickets[_id].Receiver = payable(msg.sender);
             tickets[_id].Specificity = true;
-            return "msg.sender is now the designated receiver.";
+            return;
         }
         tickets[_id].Status = status_t.Closed;
         emit UnlockValue(_id, amount);
         payable(msg.sender).transfer(amount);
         SikkerProfit = SikkerProfit.add(tickets[_id].Amount.sub(amount));
-        return "Ticket is now closed";
     }
 
-    function closeTicket(uint256 _id) public idCheck(_id) onlyPayer(tickets[_id].Payer) timeCheck(_id) returns (string memory locked) {
+    function closeTicket(uint256 _id) public idCheck(_id) onlyPayer(tickets[_id].Payer) timeCheck(_id) returns (bool) {
         uint256 amount;
         uint256 rawAmount = tickets[_id].Amount;
 
         tickets[_id].Status = status_t.Closed;
         if (tickets[_id].Type == type_t.CE && tickets[_id].Status == status_t.New)
-            return "New CE ticket is now closed.";
+            return true;
         if (tickets[_id].LossPercent == 0)
-            amount = percentage(closingTax.percent, tickets[_id].Amount, closingTax.divider);
+            amount = percentage(closingTax.percent, rawAmount, closingTax.divider);
         else
-            amount = percentage(100 - tickets[_id].LossPercent, tickets[_id].Amount, 100);
-        if (tickets[_id].Type == type_t.CE && tickets[_id].Specificity) {
+            amount = percentage(100 - tickets[_id].LossPercent, rawAmount, 100);
+        if (tickets[_id].Type == type_t.CE && tickets[_id].Specificity == true) {
             amount = amount.div(2);
             rawAmount = rawAmount.div(2);
         }
         payable(tickets[_id].Payer).transfer(amount);
         SikkerProfit = SikkerProfit.add(rawAmount.sub(amount));
         emit UnlockValue(_id, amount);
-        return "Ticket is now closed.";
+        return true;
     }
 
     function lockTicket(uint256 _id) public idCheck(_id) returns (bool) {
@@ -121,7 +138,7 @@ contract UseTickets is SikkerStats, CreateTickets {
         tickets[_id].Status = status_t.Closed;
         amount = percentage(100 - tickets[_id].LossPercent, tickets[_id].Amount, 100);
         amount = amount > 10000 ? percentage(closingTax.percent, amount, closingTax.divider) : amount;
-        if (tickets[_id].Type == type_t.CE && tickets[_id].Specificity) {
+        if (tickets[_id].Type == type_t.CE && tickets[_id].Specificity == true) {
             rawAmount = rawAmount.div(2);
             amount = amount.div(2);
         }

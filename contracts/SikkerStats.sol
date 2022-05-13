@@ -1,13 +1,12 @@
 // SPDX-License-Identifier: MIT
 pragma solidity >=0.7.0 <0.9.0;
 
-import "./SikkerMaths.sol";
 import "./Sikker.sol";
 
-contract SikkerStats is SikkerMaths, Sikker {
+contract SikkerStats is Sikker {
     using SafeMath for uint256;
 
-    function currentlyLockedValue() private view returns(uint256) {
+    function currentlyLockedValue() public view returns(uint256) {
         uint256 total = 0;
 
         for (uint256 i = 0; i < tickets.length; i++)

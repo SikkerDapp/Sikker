@@ -104,11 +104,11 @@ contract Sikker is Owner {
         uint24 divider;
     }
 
-    tax_s sendingTax;
-    tax_s closingTax;
+    tax_s public sendingTax;
+    tax_s public closingTax;
 
-    uint256 DiscountTrigger;
-    uint8 Discount;
+    uint256 public DiscountTrigger;
+    uint8 public Discount;
 
     //--------------------------------------  Events
 
@@ -148,7 +148,7 @@ contract Sikker is Owner {
     );
 
     modifier minAmount(uint256 _amount) {
-        require(_amount > 10000, "You require at least 10000 wei");
+        require(_amount > 10000, "Sikker: At least 10000 wei are required.");
         _;
     }
 
@@ -184,6 +184,8 @@ contract Sikker is Owner {
     }
 
     function changeDiscount(uint256 _triggerAmount, uint8 _discount) public minAmount(_triggerAmount) isOwner() {
+        require(_discount <= 100, "changeDiscount: Discount can not be > 100.");
+
         DiscountTrigger = _triggerAmount;
         Discount = _discount;
     }
