@@ -1,2 +1,9 @@
 node_modules
-Contracts/SikkerERC20.sol
+.env
+coverage
+coverage.json
+typechain
+
+#Hardhat files
+cache
+artifacts
