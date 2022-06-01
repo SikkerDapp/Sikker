@@ -40,17 +40,22 @@ Sikker is a decentralised escrow (third-party) platform, an algorythm you can tr
 
 Use:   Create a ticket that your commercial partner will fill or collect.
 
-They are three types of tickets:
+They are two types of tickets:
   - CE tickets = Classic Escrow ticket, seller creates one with defined needed amount,
     defined timeLock, percentage of the ticket lost if timeLock is reached,
     defined receiver (should be the creator unless it is used by a fourth-party)
 
-  - ATY tickets = Almost Trust You ticket, exactly like a CE but when money is
-    sent to the ticket, half of it is directly sent to the seller.
-    *** !!! PLEASE BE CAUTIONOUS, OR CREATE TICKET AS CUSTOMER TO AVOID FIRST-PAYMENT ABUSE !!! ***
-
   - TMM tickets = Take My Money ticket, basically a password-protected money bag
     threw in the blockchain. Make sure not to lose your password.
+
+For each type, you can precise if you want to enable its specification:
+  - CE specification makes the ticket ATY (Almost Trust You):
+    When the payer fills the ticket, half of the amount is automatically sent
+    to the receiver.
+
+  - TMM specification forces a pre-entered address as the ticket receiver.
+    Note that by default, the receiver will be 0xDEAD until someone registers
+    as receiver.
 
 **/
 
@@ -169,6 +174,8 @@ contract Sikker is Owner {
         sendingTax.divider = 10000;
         closingTax.percent = 99;
         closingTax.divider = 100;
+        Discount = 90;
+        DiscountTrigger = 500000000000000000;
         tickets.push(Ticket(type_t(0), 0, 0, 0, Dead, Dead, payable(Dead), 0x044852b2a670ade5407e78fb2863c51de9fcb96542a07186fe3aeda6bb8a116d, false, status_t.Closed));
     }
 

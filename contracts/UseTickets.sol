@@ -17,14 +17,14 @@ contract UseTickets is SikkerStats, CreateTickets {
 
         uint256 net = _amount;
         uint256 tax;
-    
+
         _multiplier = _multiplier == 0 ? 1 : _multiplier;
         net = _multiplier.mul(_amount).div(_divider, "percentage: div by 0");
-        tax = net.sub(_amount);
+        tax = _amount.sub(net);
         if (_amount < DiscountTrigger)
             return net;
         else
-            return net.add(Discount.mul(tax).div(100));
+            return net.add((Discount.mul(tax)).div(100));
     }
 
     //  -------------------------------------------  Modifiers
@@ -74,7 +74,7 @@ contract UseTickets is SikkerStats, CreateTickets {
             amount = percentage(sendingTax.percent, tickets[_id].Amount.div(2), sendingTax.divider);
             payable(tickets[_id].Receiver).transfer(amount);
             SikkerProfit = SikkerProfit.add(tickets[_id].Amount.div(2).sub(amount));
-            emit UnlockValue(_id, amount.div(2));
+            emit UnlockValue(_id, amount);
         }
         return("Ticket is now filled.");
     }
