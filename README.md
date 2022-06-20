@@ -8,4 +8,4 @@ This is Sikker's repo, wich contains all files needed to build the Sikker Dapp.
 - **Site/**
     - It contains the files to build Sikker's website, which is the user interface needed for a common use.
 
-In the *Sikker_WP.pdf*, you will find the Sikker project's description.
+In the *Sikker Light Paper.pdf*, you will find the Sikker project's description.
