@@ -12,7 +12,7 @@ import "remix_accounts.sol";
 import "../contracts/UseTickets.sol";
 
 // File name has to end with '_test.sol', this file can contain more than one testSuite contracts
-contract testSuite is UseTickets {
+contract testUseTicket is UseTickets {
 
     /// 'beforeAll' runs before all other tests
     /// More special functions are: 'beforeEach', 'beforeAll', 'afterEach' & 'afterAll'
@@ -23,7 +23,7 @@ contract testSuite is UseTickets {
 
     /// #sender: account-0
     /// #value: 0
-    function checkCeTicketCreation() public {
+/*     function checkCeTicketCreation() public {
         createTicket(
             type_t.CE,
             false,
@@ -41,11 +41,11 @@ contract testSuite is UseTickets {
         Assert.equal(tickets[1].Creator, TestsAccounts.getAccount(0), "Invalid ticket creator");
         Assert.equal(tickets[1].Hash, 0xdc6ec0436bf057ac25500c9a3af7d31c429e1d289ddf2f0fe05e828c7bbac99d, "Invalid ticket hash");
         Assert.equal(tickets[1].Status, status_t.New, "Invalid ticket status");
-    }
+    } */
 
     /// #sender: account-1
     /// #value: 0
-    function checkAtyTicketCreation() public payable {
+/*     function checkAtyTicketCreation() public payable {
         createTicket(
             type_t.CE,
             true,
@@ -63,7 +63,7 @@ contract testSuite is UseTickets {
         Assert.equal(tickets[1].Creator, TestsAccounts.getAccount(1), "Invalid ticket creator");
         Assert.equal(tickets[1].Hash, 0xdc6ec0436bf057ac25500c9a3af7d31c429e1d289ddf2f0fe05e828c7bbac99d, "Invalid ticket hash");
         Assert.equal(tickets[1].Status, status_t.New, "Invalid ticket status");
-    }
+    } */
 
     function checkSuccess() public {
         // Use 'Assert' methods: https://remix-ide.readthedocs.io/en/latest/assert_library.html
